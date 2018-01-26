@@ -13,9 +13,10 @@ RUN apk update && apk add --no-cache \
     ruby-irb \
     openssh \
     g++ \
-    make \
+    make \ 
     && rm -rf /tmp/* /var/tmp/*
 
+RUN cat /etc/apt/sources.list
 RUN cat /etc/apt/sources.list
 	
 RUN apt-get -y upgrade && apt-get update && apt-get install --no-install-recommends -y build-essential git ruby2.3-dev \
