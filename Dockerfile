@@ -1,7 +1,7 @@
 FROM heikomaass/android-sdk:latest
 
-RUN rm -rf /var/lib/apt/lists/partial/* \
-    && apt-get update && apt-get install --no-install-recommends -y build-essential git ruby2.3-dev \
+RUN sed -i -e 's/:\/\/(archive.ubuntu.com\|security.ubuntu.com)/old-releases.ubuntu.com/g' /etc/apt/sources.list \
+    && apt-get -y upgrade && apt-get update && apt-get install --no-install-recommends -y build-essential git ruby2.3-dev \
     && gem install fastlane \
     && gem install bundler \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
