@@ -90,8 +90,7 @@ RUN cd /opt && rm -f android-sdk_r24.4.1-linux.tgz
 ENV ANDROID_HOME /opt/android-sdk-linux
 ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
 
-COPY tools /opt/sdk-tools
-ENV PATH ${PATH}:/opt/sdk-tools
+
 
 RUN ["/opt/sdk-tools/android-accept-licenses.sh", "android update sdk --filter tools --no-ui --force -a"]
 RUN ["/opt/sdk-tools/android-accept-licenses.sh", "android update sdk --filter platform-tools --no-ui --force -a"]
