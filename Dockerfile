@@ -1,111 +1,41 @@
-FROM buildpack-deps:stretch
+FROM filiosoft/fastlane:latest
 
-# skip installing gem documentation
-RUN mkdir -p /usr/local/etc \
-	&& { \
-		echo 'install: --no-document'; \
-		echo 'update: --no-document'; \
-	} >> /usr/local/etc/gemrc
+ENV VERSION_SDK_TOOLS "3859397"
 
-ENV RUBY_MAJOR 2.5
-ENV RUBY_VERSION 2.5.0
-ENV RUBY_DOWNLOAD_SHA256 1da0afed833a0dab94075221a615c14487b05d0c407f991c8080d576d985b49b
-ENV RUBYGEMS_VERSION 2.7.4
-ENV BUNDLER_VERSION 1.16.1
+ENV ANDROID_HOME "/sdk"
+ENV PATH "$PATH:${ANDROID_HOME}/tools"
+ENV DEBIAN_FRONTEND noninteractive
 
-# some of ruby's build scripts are written in ruby
-#   we purge system ruby later to make sure our final image uses what we just built
-RUN set -ex \
-	\
-	&& buildDeps=' \
-		bison \
-		dpkg-dev \
-		libgdbm-dev \
-		ruby \
-	' \
-	&& apt-get update \
-	&& apt-get install -y --no-install-recommends $buildDeps \
-	&& rm -rf /var/lib/apt/lists/* \
-	\
-	&& wget -O ruby.tar.xz "https://cache.ruby-lang.org/pub/ruby/${RUBY_MAJOR%-rc}/ruby-$RUBY_VERSION.tar.xz" \
-	&& echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.xz" | sha256sum -c - \
-	\
-	&& mkdir -p /usr/src/ruby \
-	&& tar -xJf ruby.tar.xz -C /usr/src/ruby --strip-components=1 \
-	&& rm ruby.tar.xz \
-	\
-	&& cd /usr/src/ruby \
-	\
-# hack in "ENABLE_PATH_CHECK" disabling to suppress:
-#   warning: Insecure world writable dir
-	&& { \
-		echo '#define ENABLE_PATH_CHECK 0'; \
-		echo; \
-		cat file.c; \
-	} > file.c.new \
-	&& mv file.c.new file.c \
-	\
-	&& autoconf \
-	&& gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
-	&& ./configure \
-		--build="$gnuArch" \
-		--disable-install-doc \
-		--enable-shared \
-	&& make -j "$(nproc)" \
-	&& make install \
-	\
-	&& apt-get purge -y --auto-remove $buildDeps \
-	&& cd / \
-	&& rm -r /usr/src/ruby \
-	\
-	&& gem update --system "$RUBYGEMS_VERSION" \
-	&& gem install bundler --version "$BUNDLER_VERSION" --force \
-	&& rm -r /root/.gem/
+RUN apt-get -qq update && \
+    apt-get install -qqy --no-install-recommends \
+      bzip2 \
+      curl \
+      git-core \
+      html2text \
+      openjdk-8-jdk \
+      libc6-i386 \
+      lib32stdc++6 \
+      lib32gcc1 \
+      lib32ncurses5 \
+      lib32z1 \
+      unzip \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# install things globally, for great justice
-# and don't create ".bundle" in all our apps
-ENV GEM_HOME /usr/local/bundle
-ENV BUNDLE_PATH="$GEM_HOME" \
-	BUNDLE_BIN="$GEM_HOME/bin" \
-	BUNDLE_SILENCE_ROOT_WARNING=1 \
-	BUNDLE_APP_CONFIG="$GEM_HOME"
-ENV PATH $BUNDLE_BIN:$PATH
-RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
-	&& chmod 777 "$GEM_HOME" "$BUNDLE_BIN"
+RUN rm -f /etc/ssl/certs/java/cacerts; \
+    /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
-CMD [ "irb" ]
+RUN curl -s https://dl.google.com/android/repository/sdk-tools-linux-${VERSION_SDK_TOOLS}.zip > /sdk.zip && \
+    unzip /sdk.zip -d /sdk && \
+    rm -v /sdk.zip
 
-RUN dpkg --add-architecture i386
-RUN apt-get update -qq
-RUN apt-get install -y expect
-RUN apt-get install -y --no-install-recommends openjdk-8-jdk 
-RUN apt-get install -y --no-install-recommends curl
-RUN apt-get install -y --no-install-recommends libncurses5:i386 libstdc++6:i386 zlib1g:i386
-RUN apt-get install -y --no-install-recommends maven
+RUN mkdir -p $ANDROID_HOME/licenses/ \
+  && echo "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb78af6dfcb131a6481e" > $ANDROID_HOME/licenses/android-sdk-license \
+  && echo "84831b9409646a918e30573bab4c9c91346d8abd" > $ANDROID_HOME/licenses/android-sdk-preview-license
 
-RUN cd /opt && curl -O http://dl.google.com/android/android-sdk_r24.4.1-linux.tgz 
-RUN cd /opt && tar xzf android-sdk_r24.4.1-linux.tgz 
-RUN cd /opt && rm -f android-sdk_r24.4.1-linux.tgz 
+ADD packages.txt /sdk
+RUN mkdir -p /root/.android && \
+  touch /root/.android/repositories.cfg && \
+  ${ANDROID_HOME}/tools/bin/sdkmanager --update 
 
-ENV ANDROID_HOME /opt/android-sdk-linux
-ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
-
-
-
-RUN ["/opt/sdk-tools/android-accept-licenses.sh", "android update sdk --filter tools --no-ui --force -a"]
-RUN ["/opt/sdk-tools/android-accept-licenses.sh", "android update sdk --filter platform-tools --no-ui --force -a"]
-RUN ["/opt/sdk-tools/android-accept-licenses.sh", "android update sdk --filter \"build-tools-23.0.2\" --no-ui --force -a"]
-RUN ["/opt/sdk-tools/android-accept-licenses.sh", "android update sdk --filter \"extra-android-support\" --no-ui --force -a"]
-RUN ["/opt/sdk-tools/android-accept-licenses.sh", "android update sdk --filter \"android-23\" --no-ui --force -a"]
-RUN ["/opt/sdk-tools/android-accept-licenses.sh", "android update sdk --filter \"extra-android-m2repository\" --no-ui --force -a"]
-RUN ["/opt/sdk-tools/android-accept-licenses.sh", "android update sdk --filter \"extra-google-m2repository\" --no-ui --force -a"]
-
-RUN apt-get clean
-
-VOLUME /root/.m2
-VOLUME /workspace
-WORKDIR /workspace
-
-ENV FASTLANE_VERSION=2.12.0
-
-RUN gem install fastlane:$FASTLANE_VERSION -NV
+RUN while read -r package; do PACKAGES="${PACKAGES}${package} "; done < /sdk/packages.txt && \
+    ${ANDROID_HOME}/tools/bin/sdkmanager ${PACKAGES}
