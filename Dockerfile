@@ -6,7 +6,7 @@ ENV ANDROID_HOME "/sdk"
 ENV PATH "$PATH:${ANDROID_HOME}/tools"
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get -qq update && \
+RUN apt-get -qq upgrade apt-get -qq update && \
     apt-get install -qqy --no-install-recommends \
       bzip2 \
       curl \
