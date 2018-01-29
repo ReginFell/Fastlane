@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM buildpack-deps:stretch
 
 # skip installing gem documentation
 RUN mkdir -p /usr/local/etc \
