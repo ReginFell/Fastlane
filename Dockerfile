@@ -1,23 +1,4 @@
 FROM heikomaass/android-sdk:latest
-
-RUN apk update && apk add --no-cache \
-    bash \
-    perl \
-    curl \
-    unzip \
-    zip \
-    git \
-    ruby \
-    ruby-dev \
-    ruby-rdoc \
-    ruby-irb \
-    openssh \
-    g++ \
-    make \ 
-    && rm -rf /tmp/* /var/tmp/*
-
-RUN cat /etc/apt/sources.list
-RUN cat /etc/apt/sources.list
 	
 RUN apt-get -y upgrade && apt-get update && apt-get install --no-install-recommends -y build-essential git ruby2.3-dev \
     && gem install fastlane \
