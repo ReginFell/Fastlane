@@ -17,3 +17,4 @@ RUN apk update && apk add —no-cache \
     && rm -rf /tmp/* /var/tmp/*
 
 RUN apt-get update && apt-get install google-cloud-sdk
+RUN gcloud init
