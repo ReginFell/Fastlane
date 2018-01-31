@@ -8,6 +8,7 @@ RUN apk update && apk add --no-cache \
     zip \
     git \
     ruby \
+	google-cloud-sdk \
     ruby-dev \
     ruby-rdoc \
     ruby-irb \
@@ -16,5 +17,4 @@ RUN apk update && apk add --no-cache \
     make \
     && rm -rf /tmp/* /var/tmp/*
 
-RUN apk update && apk add google-cloud-sdk
 RUN gcloud init
