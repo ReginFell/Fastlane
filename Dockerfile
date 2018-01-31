@@ -16,5 +16,5 @@ RUN apk update && apk add --no-cache \
     make \
     && rm -rf /tmp/* /var/tmp/*
 
-RUN apk update 
+RUN apk update && apk add google-cloud-sdk
 RUN gcloud init
