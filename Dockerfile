@@ -8,7 +8,10 @@ RUN apk update && apk add --no-cache \
     zip \
     git \
     ruby \
-	google-cloud-sdk \
+    && wget https://dl.google.com/dl/cloudsdk/channels/rapid/google-cloud-sdk.zip \
+    && unzip google-cloud-sdk.zip \
+    && rm google-cloud-sdk.zip \
+    && google-cloud-sdk/install.sh \
     ruby-dev \
     ruby-rdoc \
     ruby-irb \
