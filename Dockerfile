@@ -9,11 +9,14 @@ RUN apk --no-cache add \
         py-crcmod \
         openssh-client \
         git \
-    && wget --quiet --output-document=/tmp/google-cloud-sdk.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/google-cloud-sdk.tar.gz \
-     mkdir -p /opt \
-     tar zxf /tmp/google-cloud-sdk.tar.gz --directory /opt \
-     /opt/google-cloud-sdk/install.sh --quiet \
-     source /opt/google-cloud-sdk/path.bash.inc \
+    && curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    tar xzf google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    rm google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    ln -s /lib /lib64 && \
+    gcloud config set core/disable_usage_reporting true && \
+    gcloud config set component_manager/disable_update_check true && \
+    gcloud config set metrics/environment github_docker_image && \
+    gcloud --version
 
 
 	
