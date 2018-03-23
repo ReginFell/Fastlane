@@ -6,6 +6,7 @@ ENV CLOUD_SDK_VERSION 183.0.0
 
 ENV PATH /google-cloud-sdk/bin:$PATH
 RUN apk --no-cache add \
+        fastlane \
         curl \
         python \
         py-crcmod \
