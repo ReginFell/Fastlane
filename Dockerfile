@@ -3,7 +3,8 @@ FROM unitedclassifiedsapps/gitlab-ci-android-fastlane
 ENV CLOUD_SDK_VERSION 183.0.0
 ENV PATH /google-cloud-sdk/bin:$PATH
 
-RUN apk --no-cache add \
+RUN apt-get update
+RUN apt-get -y install --no-install-recommends \
         fastlane \
         curl \
         python \
