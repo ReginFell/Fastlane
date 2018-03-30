@@ -7,8 +7,7 @@ RUN apt-get update
 RUN apt-get -y install --no-install-recommends \
         fastlane \
         curl \
-        python \
-        py-crcmod \
+        python-pip \
         openssh-client \
         git \
     && curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
